@@ -13,7 +13,7 @@ Slide 2 - KUDO Architecture
 
 Review Hello World - Nginx Example in system
 
-## Demo KUDO Installtion with Simple Example:
+## Demo KUDO Installtion with Simple Example
 
 - Konvoy Kubernetes already installed and connected to kubectl
 ```
@@ -49,7 +49,7 @@ K8S KUDO $ kubectl get pods --namespace=kudo-system
 NAME                        READY   STATUS    RESTARTS   AGE
 kudo-controller-manager-0   1/1     Running   0          174m
 ```
-*!! Install Nginx Example*
+**!! Install Nginx Example**
 
 ## Demo KUDO Install and Plan
 - Install Zookeeper with KUDO and check plan
