@@ -1,17 +1,20 @@
 # Champions KUDO Video Script
 
-## Purpose: 
+## Purpose 
 This should be a short recording that can be used in external awareness efforts to explain the value of KUDO to a highly technical audience.  Demonstration should show the deployment and use of KUDO with one of our operators (such as the Kafka operator).   Key is to convince someone who is interested in leveraging stateful data services that KUDO is the way to go.
 
-## Preso Opening:
+## Preso Opening
 
 Slide 1 - Life without KUDO
 
 Slide 2 - KUDO Architecture
 
-## Demo Overview:
+## KUDO architecture
 
-Installation
+Review Hello World - Nginx Example in system
+
+## Demo KUDO Installtion with Simple Example:
+
 - Konvoy Kubernetes already installed and connected to kubectl
 ```
 K8S KUDO $ kubectl get nodes
@@ -46,7 +49,9 @@ K8S KUDO $ kubectl get pods --namespace=kudo-system
 NAME                        READY   STATUS    RESTARTS   AGE
 kudo-controller-manager-0   1/1     Running   0          174m
 ```
+*!! Install Nginx Example*
 
+## Demo KUDO Install and Plan
 - Install Zookeeper with KUDO and check plan
 Run:
 ```
@@ -95,3 +100,6 @@ Plan(s) for "kafka" in namespace "default":
                 └── not-allowed [NOT ACTIVE]
 ```
 
+### Setup Kafka Studio Demo
+
+### 
