@@ -13,7 +13,7 @@ Slide 2 - KUDO Architecture
 
 Review Hello World - Nginx Example in system
 
-## Demo KUDO Installtion with Simple Example
+## Demo KUDO Installation with Simple Example
 
 - Konvoy Kubernetes already installed and connected to kubectl
 ```
@@ -49,7 +49,79 @@ K8S KUDO $ kubectl get pods --namespace=kudo-system
 NAME                        READY   STATUS    RESTARTS   AGE
 kudo-controller-manager-0   1/1     Running   0          174m
 ```
-**!! Install Nginx Example**
+**Install Nginx Example**
+
+Discuss and show directory structure
+```
+KUDO first-operator $ ls -Rl
+total 16
+-rw-r--r--  1 jamesdyckowski  staff  384 Oct 31 15:11 operator.yaml
+-rw-r--r--  1 jamesdyckowski  staff  100 Sep  4 16:03 params.yaml
+drwxr-xr-x  3 jamesdyckowski  staff   96 Sep  4 16:07 templates
+
+./templates:
+total 8
+-rw-r--r--  1 jamesdyckowski  staff  401 Sep  4 16:02 deployment.yaml
+```
+
+Discuss and show declarative operator and parameter files
+```
+KUDO first-operator $ cat operator.yaml && cat params.yaml
+name: "first-operator"
+version: "0.1.0"
+kudoVersion: ">= 0.2.0"
+kubernetesVersion: ">= 1.14"
+maintainers:
+- jdyckowski@d2iq.com
+url: https://kudo.dev
+tasks:
+  nginx:
+    resources:
+      - deployment.yaml
+plans:
+  deploy:
+    strategy: serial
+    phases:
+      - name: main
+        strategy: serial
+        steps:
+          - name: everything
+            tasks:
+              - nginx
+replicas:
+ description: Number of replicas that should be run as port of the deployment
+ default: 2
+ ```
+
+ Discuss and show template/deployment with KUDO parameter
+ ```
+ KUDO first-operator $ cat templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: {{ .Params.Replicas }} # tells deployment to run X pods matching the template
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+ ```
+
+Install KUDO - Nginx (first-operator) with parameters
+
+```
+kubectl kudo install ./ --instance=nginx1 --parameter replicas=5
+```
 
 ## Demo KUDO Install and Plan
 - Install Zookeeper with KUDO and check plan
