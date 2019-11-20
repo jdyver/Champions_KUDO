@@ -15,6 +15,14 @@ Review Hello World - Nginx Example in system
 
 ## Demo KUDO Installation with Simple Example
 
+- Environment variables setup for paths
+```
+export FIRST=~/Documents/Scripts/KUDO/first-operator
+export ZK=~/Documents/Scripts/KUDO-Operators/operators/repository/zookeeper/operator
+export KAFKA=~/Documents/Scripts/KUDO-Labs/Kafka-JD/operator
+export STUDIO=~/Documents/Scripts/Kubernetes/konvoy-kudo-studio
+```
+
 - Konvoy Kubernetes already installed and connected to kubectl
 ```
 K8S KUDO $ kubectl get nodes
@@ -149,15 +157,22 @@ Plan(s) for "zk" in namespace "default":
                 └── connection [NOT ACTIVE]
 ```
 
+```
+cd $ZK
+cat operator.yaml
+cat params.yaml
+```
+
 - Install Kafka with KUDO and check plan
 Run:
 ```
-kubectl kudo install kafka --instance=kafka
+kubectl kubectl kudo install kafka --instance=kafka -p ZOOKEEPER_URI=zk-zookeeper-0.zk-hs:2181,zk-zookeeper-1.zk-hs:2181,zk-zookeeper-2.zk-hs:2181 --version=0.1.3
+
 kubectl kudo plan status --instance=kafka
 ```
 ```
-K8S KUDO $ kubectl kudo install kafka --instance=kafka
-instance.kudo.dev/v1alpha1/kafka created
+K8S KUDO $ kubectl kudo install ./ --instance=kafka -p ZOOKEEPER_URI=zk-zookeeper-0.zk-hs:2181,zk-zookeeper-1.zk-hs:2181,zk-zookeeper-2.zk-hs:2181 --version=0.1.3
+instance.kudo.dev/v1beta1/kafka created
 
 K8S KUDO $ kubectl kudo plan status --instance=kafka
 Plan(s) for "kafka" in namespace "default":
@@ -172,6 +187,39 @@ Plan(s) for "kafka" in namespace "default":
                 └── not-allowed [NOT ACTIVE]
 ```
 
+(While installing)
+Move to Kafka operator directory
+
+- Look at BROKER options and defaults
+- Look at ZOOKEEPER options and defaults
+```
+cd $KAFKA
+vi params.yaml
+cat params.yaml | grep ZOO
+```
 ### Setup Kafka Studio Demo
 
+Run command
+
+
 ### 
+
+```
+jamess-mbp-3:operator jamesdyckowski$ kubectl kudo update --instance=kafka -p BROKER_COUNT=4
+Instance kafka was updated.jamess-mbp-3:operator jamesdyckowski$ kubectl kudo plan status --instance=kafka
+Plan(s) for "kafka" in namespace "default":
+.
+└── kafka (Operator-Version: "kafka-1.0.2" Active-Plan: "update")
+    ├── Plan deploy (serial strategy) [NOT ACTIVE]
+    │   └── Phase deploy-kafka (serial strategy) [NOT ACTIVE]
+    │       └── Step deploy-kafka (serial strategy) [NOT ACTIVE]
+    │           └── deploy [NOT ACTIVE]
+    ├── Plan not-allowed (serial strategy) [NOT ACTIVE]
+    │   └── Phase not-allowed (serial strategy) [NOT ACTIVE]
+    │       └── Step not-allowed (serial strategy) [NOT ACTIVE]
+    │           └── not-allowed [NOT ACTIVE]
+    └── Plan update (serial strategy) [IN_PROGRESS]
+        └── Phase update-kafka [IN_PROGRESS]
+            └── Step update (IN_PROGRESS)
+
+```
