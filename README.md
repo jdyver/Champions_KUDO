@@ -17,10 +17,11 @@ Review Hello World - Nginx Example in system
 
 - Environment variables setup for paths
 ```
-export FIRST=~/Documents/Scripts/KUDO/first-operator
+export FIRST=~/Documents/Scripts/KUDO-Operators/operators/repository/first-operator/operator
 export ZK=~/Documents/Scripts/KUDO-Operators/operators/repository/zookeeper/operator
-export KAFKA=~/Documents/Scripts/KUDO-Labs/Kafka-JD/operator
+export KAFKA=~/Documents/Scripts/KUDO-Operators/operators/repository/kafka/operator
 export STUDIO=~/Documents/Scripts/Kubernetes/konvoy-kudo-studio
+export SECOND=~/Documents/Scripts/KUDO-Labs/second-operator
 ```
 
 - Konvoy Kubernetes already installed and connected to kubectl
@@ -199,8 +200,12 @@ cat params.yaml | grep ZOO
 ```
 ### Setup Kafka Studio Demo
 
-Run command
+Build studio
 
+```
+cd $STUDIO
+
+```
 
 ### 
 
