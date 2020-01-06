@@ -336,9 +336,13 @@ kubectl logs kudo-kafka-consumer-6b4dd5cd59-k8bpc -f
 Baseline:
 
 ```
-kubectl get instances.kudo.dev kafka -o yaml | grep "name: kafka"
+JD kafka-eg $ kubectl get instances.kudo.dev kafka -o yaml | grep "name: kafka"
+  name: kafka
+    name: kafka-0.1.3
 
-k describe po kafka-kafka-0 | grep Image
+JD kafka-eg $ k describe po kafka-kafka-0 | grep Image
+    Image:         mesosphere/kafka:0.1.3-2.2.1
+    Image ID:      docker.io/mesosphere/kafka@sha256:909f231266fbba1b8f4a85fdfc32d55d44d704257db5cf592b3950aeccc8a8b4
 ```
 
 Run Upgrade:
