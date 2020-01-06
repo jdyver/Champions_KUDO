@@ -60,6 +60,10 @@ kudo-controller-manager-0   1/1     Running   0          174m
 ```
 **Install Nginx Example**
 
+```
+cd $FIRST
+```
+
 Discuss and show directory structure
 ```
 KUDO first-operator $ ls -Rl
@@ -100,10 +104,10 @@ plans:
 replicas:
  description: Number of replicas that should be run as port of the deployment
  default: 2
- ```
+```
 
  Discuss and show template/deployment with KUDO parameter
- ```
+```
  KUDO first-operator $ cat templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -132,12 +136,101 @@ Install KUDO - Nginx (first-operator) with parameters
 kubectl kudo install ./ --instance=nginx1 --parameter replicas=5
 ```
 
+Check Pods
+
+```
+kubectl get pods
+NAME                                READY   STATUS    RESTARTS   AGE
+nginx-deployment-6745858b98-44mg9   1/1     Running   0          29s
+nginx-deployment-6745858b98-7jqkv   1/1     Running   0          27s
+nginx-deployment-6745858b98-dpmj7   1/1     Running   0          27s
+nginx-deployment-6745858b98-m68fx   1/1     Running   0          29s
+nginx-deployment-6745858b98-vn6lb   1/1     Running   0          29s
+```
+
+Show nginx KUDO instance
+```
+kubectl kudo get instances
+```
+
+Remove First Operator
+```
+kubectl kudo uninstall --instance nginx1
+instance./fo deleted
+```
+
+Move to Second Operator
+
+```
+cd $SECOND
+```
+
+```
+ls -Rl
+total 16
+-rw-r--r--  1 jamesdyckowski  staff  442 Dec 12 17:43 operator.yaml
+-rw-r--r--  1 jamesdyckowski  staff  234 Dec 13 14:28 params.yaml
+drwxr-xr-x  3 jamesdyckowski  staff   96 Dec 13 14:28 templates
+
+./templates:
+total 8
+-rw-r--r--  1 jamesdyckowski  staff  375 Dec 13 14:28 deployment.yaml
+```
+
+```
+cat operator.yaml
+```
+
+```
+cat params.yaml && cat templates/deployment.yaml
+```
+
+```
+kubectl kudo install ./ --instance secondop --parameter IMAGE_ID=1.8
+./ is a local file package
+operator.kudo.dev/v1beta1/second-operator created
+operatorversion.kudo.dev/v1beta1/second-operator-0.1.0 created
+instance.kudo.dev/v1beta1/secondop created
+```
+
+```
+kubectl get pods
+NAME                                         READY   STATUS              RESTARTS   AGE
+nginx-secondop-deployment-5f595ccdd7-625x4   0/1     ContainerCreating   0          4s
+nginx-secondop-deployment-5f595ccdd7-bmqcn   0/1     ContainerCreating   0          4s
+nginx-secondop-deployment-5f595ccdd7-ktbl8   0/1     ContainerCreating   0          4s
+```
+
+```
+kubectl describe pod nginx-secondop-deployment-86b8c94d66-2x9lf
+...
+  Normal  Pulled     4m54s  kubelet, ip-10-0-132-227.us-west-2.compute.internal  Successfully pulled image "nginx:1.8"
+  Normal  Created    4m54s  kubelet, ip-10-0-132-227.us-west-2.compute.internal  Created container nginx
+  Normal  Started    4m54s  kubelet, ip-10-0-132-227.us-west-2.compute.internal  Started container nginx
+```
+
+```
+kubectl kudo plan status --instance secondop
+Plan(s) for "secondop" in namespace "default":
+.
+└── secondop (Operator-Version: "second-operator-0.1.0" Active-Plan: "deploy")
+    └── Plan deploy (serial strategy) [COMPLETE]
+        └── Phase main [COMPLETE]
+            └── Step everything [COMPLETE]
+```
+
 ## Demo KUDO Install and Plan
+
+```
+clear
+cd $ZK
+```
+
 - Install Zookeeper with KUDO and check plan
 Run:
 ```
-kubectl kudo install zookeeper --instance=zk
-kubectl kudo plan status --instance=zk
+K8S KUDO $ kubectl kudo install zookeeper --instance=zk
+K8S KUDO $ kubectl kudo plan status --instance=zk
 ```
 ```
 K8S KUDO $ kubectl kudo install zookeeper --instance=zk
@@ -167,7 +260,7 @@ cat params.yaml
 - Install Kafka with KUDO and check plan
 Run:
 ```
-kubectl kubectl kudo install kafka --instance=kafka -p ZOOKEEPER_URI=zk-zookeeper-0.zk-hs:2181,zk-zookeeper-1.zk-hs:2181,zk-zookeeper-2.zk-hs:2181 --version=0.1.3
+kubectl kudo install kafka --instance=kafka -p ZOOKEEPER_URI=zk-zookeeper-0.zk-hs:2181,zk-zookeeper-1.zk-hs:2181,zk-zookeeper-2.zk-hs:2181 --version=0.1.3
 
 kubectl kudo plan status --instance=kafka
 ```
@@ -193,24 +286,17 @@ Move to Kafka operator directory
 
 - Look at BROKER options and defaults
 - Look at ZOOKEEPER options and defaults
+
 ```
 cd $KAFKA
 vi params.yaml
 cat params.yaml | grep ZOO
 ```
-### Setup Kafka Studio Demo
 
-Build studio
-
-```
-cd $STUDIO
+### Scale Out Kafka
 
 ```
-
-### 
-
-```
-jamess-mbp-3:operator jamesdyckowski$ kubectl kudo update --instance=kafka -p BROKER_COUNT=4
+K8S KUDO $ kubectl kudo update --instance=kafka -p BROKER_COUNT=4
 Instance kafka was updated.jamess-mbp-3:operator jamesdyckowski$ kubectl kudo plan status --instance=kafka
 Plan(s) for "kafka" in namespace "default":
 .
@@ -228,3 +314,54 @@ Plan(s) for "kafka" in namespace "default":
             └── Step update (IN_PROGRESS)
 
 ```
+
+### Setup Kafka Quick Demo
+
+Build Kafka Example
+
+```
+cd $SECOND
+cd ../kafka-eg/
+bash run-timedate-log.sh
+```
+
+```
+kubectl get pods | grep cons
+
+kubectl logs kudo-kafka-consumer-6b4dd5cd59-k8bpc -f
+```
+
+### Upgrade Kafka
+
+Baseline:
+
+```
+kubectl get instances.kudo.dev kafka -o yaml | grep "name: kafka"
+
+k describe po kafka-kafka-0 | grep Image
+```
+
+Run Upgrade:
+
+```
+k kudo upgrade kafka --version=1.1.0 --instance kafka
+
+kubectl kudo plan status --instance=kafka
+
+JD KUDO $ kubectl get instances.kudo.dev kafka -o yaml | grep "name: kafka"
+  name: kafka
+    name: kafka-1.1.0
+
+JD KUDO $ kubectl describe po kafka-kafka-0 | grep Image
+    Image:         quay.io/prometheus/node-exporter
+    Image ID:      quay.io/prometheus/node-exporter@sha256:a2f29256e53cc3e0b64d7a472512600b2e9410347d53cdc85b49f659c17e02ee
+    Image:         mesosphere/kafka:1.1.0-2.4.0
+    Image ID:      docker.io/mesosphere/kafka@sha256:a8720ff3b1bd02b1317b135dd977da52a6b312641bcf5e98cd06b82b59aa4092
+```
+
+Check to make sure we are still running messages:
+
+```
+kubectl logs kudo-kafka-consumer-6b4dd5cd59-k8bpc -f
+```
+
