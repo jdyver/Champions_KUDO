@@ -267,7 +267,7 @@ cat operator.yaml
 cat params.yaml
 ```
 
-- Install Kafka with KUDO and check plan
+## Demo KUDO Operator / Application Upgrades with Kafka
 Run:
 ```
 kubectl kudo install kafka --instance=kafka -p ZOOKEEPER_URI=zk-zookeeper-0.zk-hs:2181,zk-zookeeper-1.zk-hs:2181,zk-zookeeper-2.zk-hs:2181 --version=0.1.3
