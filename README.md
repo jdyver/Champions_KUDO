@@ -13,7 +13,7 @@ Slide 2 - KUDO Architecture
 
 Review Hello World - Nginx Example in system
 
-## Demo KUDO Installation with Simple Example
+## Install KUDO
 
 - Environment variables setup for paths
 ```
@@ -58,12 +58,13 @@ K8S KUDO $ kubectl get pods --namespace=kudo-system
 NAME                        READY   STATUS    RESTARTS   AGE
 kudo-controller-manager-0   1/1     Running   0          174m
 ```
-**Install Nginx Example**
+
+## Demo KUDO Structure, Customization, Installation and Uninstallation with Nginx (First Operator) Example
 
 ```
 cd $FIRST
 ```
-
+**KUDO Operator Structure**
 Discuss and show directory structure
 ```
 KUDO first-operator $ ls -Rl
@@ -130,10 +131,10 @@ spec:
         - containerPort: 80
  ```
 
-Install KUDO - Nginx (first-operator) with parameters
+**KUDO Install - Nginx (first-operator) with parameters**
 
 ```
-kubectl kudo install ./ --instance=nginx1 --parameter replicas=5
+kubectl kudo install first-operator --instance=nginx1
 ```
 
 Check Pods
@@ -152,7 +153,7 @@ Show nginx KUDO instance
 ```
 kubectl kudo get instances
 ```
-
+**KUDO Uninstall**
 Remove First Operator
 ```
 kubectl kudo uninstall --instance nginx1
@@ -185,6 +186,7 @@ cat operator.yaml
 cat params.yaml && cat templates/deployment.yaml
 ```
 
+**KUDO Install (local repo) with Custom Parameter**
 ```
 kubectl kudo install ./ --instance secondop --parameter IMAGE_ID=1.8
 ./ is a local file package
@@ -219,7 +221,15 @@ Plan(s) for "secondop" in namespace "default":
             └── Step everything [COMPLETE]
 ```
 
-## Demo KUDO Install and Plan
+**KUDO Scale / Update Parameter**
+
+```
+kubectl kudo update --instance secondop -p replicas=5
+
+k get po -w
+```
+
+## Demo KUDO Plans and Plan Status with Zookeeper
 
 ```
 clear
@@ -293,29 +303,7 @@ vi params.yaml
 cat params.yaml | grep ZOO
 ```
 
-### Scale Out Kafka
-
-```
-K8S KUDO $ kubectl kudo update --instance=kafka -p BROKER_COUNT=4
-Instance kafka was updated.jamess-mbp-3:operator jamesdyckowski$ kubectl kudo plan status --instance=kafka
-Plan(s) for "kafka" in namespace "default":
-.
-└── kafka (Operator-Version: "kafka-1.0.2" Active-Plan: "update")
-    ├── Plan deploy (serial strategy) [NOT ACTIVE]
-    │   └── Phase deploy-kafka (serial strategy) [NOT ACTIVE]
-    │       └── Step deploy-kafka (serial strategy) [NOT ACTIVE]
-    │           └── deploy [NOT ACTIVE]
-    ├── Plan not-allowed (serial strategy) [NOT ACTIVE]
-    │   └── Phase not-allowed (serial strategy) [NOT ACTIVE]
-    │       └── Step not-allowed (serial strategy) [NOT ACTIVE]
-    │           └── not-allowed [NOT ACTIVE]
-    └── Plan update (serial strategy) [IN_PROGRESS]
-        └── Phase update-kafka [IN_PROGRESS]
-            └── Step update (IN_PROGRESS)
-
-```
-
-### Setup Kafka Quick Demo
+**Setup Kafka Quick Demo**
 
 Build Kafka Example
 
@@ -331,7 +319,7 @@ kubectl get pods | grep cons
 kubectl logs kudo-kafka-consumer-6b4dd5cd59-k8bpc -f
 ```
 
-### Upgrade Kafka
+**Upgrade Kafka**
 
 Baseline:
 
@@ -369,3 +357,27 @@ Check to make sure we are still running messages:
 kubectl logs kudo-kafka-consumer-6b4dd5cd59-k8bpc -f
 ```
 
+
+
+
+### BACKUP: Scale Out Kafka
+
+```
+K8S KUDO $ kubectl kudo update --instance=kafka -p BROKER_COUNT=4
+Instance kafka was updated.jamess-mbp-3:operator jamesdyckowski$ kubectl kudo plan status --instance=kafka
+Plan(s) for "kafka" in namespace "default":
+.
+└── kafka (Operator-Version: "kafka-1.0.2" Active-Plan: "update")
+    ├── Plan deploy (serial strategy) [NOT ACTIVE]
+    │   └── Phase deploy-kafka (serial strategy) [NOT ACTIVE]
+    │       └── Step deploy-kafka (serial strategy) [NOT ACTIVE]
+    │           └── deploy [NOT ACTIVE]
+    ├── Plan not-allowed (serial strategy) [NOT ACTIVE]
+    │   └── Phase not-allowed (serial strategy) [NOT ACTIVE]
+    │       └── Step not-allowed (serial strategy) [NOT ACTIVE]
+    │           └── not-allowed [NOT ACTIVE]
+    └── Plan update (serial strategy) [IN_PROGRESS]
+        └── Phase update-kafka [IN_PROGRESS]
+            └── Step update (IN_PROGRESS)
+
+```
