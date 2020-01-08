@@ -59,15 +59,15 @@ NAME                        READY   STATUS    RESTARTS   AGE
 kudo-controller-manager-0   1/1     Running   0          174m
 ```
 
-## Demo KUDO Structure, Customization, Installation and Uninstallation with Nginx (First Operator) Example
+## Demo KUDO Structure, Customization, Installation, Scale and Uninstallation with Nginx (Second Operator) Example
 
 ```
-cd $FIRST
+cd $SECOND
 ```
 **KUDO Operator Structure**
 Discuss and show directory structure
 ```
-KUDO first-operator $ ls -Rl
+KUDO second-operator $ ls -Rl
 total 16
 -rw-r--r--  1 jamesdyckowski  staff  384 Oct 31 15:11 operator.yaml
 -rw-r--r--  1 jamesdyckowski  staff  100 Sep  4 16:03 params.yaml
@@ -80,127 +80,20 @@ total 8
 
 Discuss and show declarative operator and parameter files
 ```
-KUDO first-operator $ cat operator.yaml && cat params.yaml
-name: "first-operator"
-version: "0.1.0"
-kudoVersion: ">= 0.2.0"
-kubernetesVersion: ">= 1.14"
-maintainers:
-- jdyckowski@d2iq.com
-url: https://kudo.dev
-tasks:
-  nginx:
-    resources:
-      - deployment.yaml
-plans:
-  deploy:
-    strategy: serial
-    phases:
-      - name: main
-        strategy: serial
-        steps:
-          - name: everything
-            tasks:
-              - nginx
-replicas:
- description: Number of replicas that should be run as port of the deployment
- default: 2
-```
-
- Discuss and show template/deployment with KUDO parameter
-```
- KUDO first-operator $ cat templates/deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-spec:
-  selector:
-    matchLabels:
-      app: nginx
-  replicas: {{ .Params.Replicas }} # tells deployment to run X pods matching the template
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx-container
-        image: nginx:1.7.9
-        ports:
-        - containerPort: 80
- ```
-
-**KUDO Install - Nginx (first-operator) with parameters**
-
-```
-kubectl kudo install first-operator --instance=nginx1
-```
-
-Check Pods
-
-```
-kubectl get pods
-NAME                                READY   STATUS    RESTARTS   AGE
-nginx-deployment-6745858b98-44mg9   1/1     Running   0          29s
-nginx-deployment-6745858b98-7jqkv   1/1     Running   0          27s
-nginx-deployment-6745858b98-dpmj7   1/1     Running   0          27s
-nginx-deployment-6745858b98-m68fx   1/1     Running   0          29s
-nginx-deployment-6745858b98-vn6lb   1/1     Running   0          29s
-```
-
-Show nginx KUDO instance
-```
-kubectl kudo get instances
-```
-**KUDO Uninstall**
-Remove First Operator
-```
-kubectl kudo uninstall --instance nginx1
-instance./fo deleted
-```
-
-Move to Second Operator
-
-```
-cd $SECOND
-```
-
-```
-ls -Rl
-total 16
--rw-r--r--  1 jamesdyckowski  staff  442 Dec 12 17:43 operator.yaml
--rw-r--r--  1 jamesdyckowski  staff  234 Dec 13 14:28 params.yaml
-drwxr-xr-x  3 jamesdyckowski  staff   96 Dec 13 14:28 templates
-
-./templates:
-total 8
--rw-r--r--  1 jamesdyckowski  staff  375 Dec 13 14:28 deployment.yaml
-```
-
-```
 cat operator.yaml
-```
 
-```
-cat params.yaml && cat templates/deployment.yaml
+cat params.yaml
+
+cat templates/deployment.yaml
 ```
 
 **KUDO Install (local repo) with Custom Parameter**
 ```
 kubectl kudo install ./ --instance secondop --parameter IMAGE_ID=1.8
-./ is a local file package
-operator.kudo.dev/v1beta1/second-operator created
-operatorversion.kudo.dev/v1beta1/second-operator-0.1.0 created
-instance.kudo.dev/v1beta1/secondop created
 ```
 
 ```
 kubectl get pods
-NAME                                         READY   STATUS              RESTARTS   AGE
-nginx-secondop-deployment-5f595ccdd7-625x4   0/1     ContainerCreating   0          4s
-nginx-secondop-deployment-5f595ccdd7-bmqcn   0/1     ContainerCreating   0          4s
-nginx-secondop-deployment-5f595ccdd7-ktbl8   0/1     ContainerCreating   0          4s
 ```
 
 ```
@@ -213,27 +106,26 @@ kubectl describe pod nginx-secondop-deployment-86b8c94d66-2x9lf
 
 ```
 kubectl kudo plan status --instance secondop
-Plan(s) for "secondop" in namespace "default":
-.
-└── secondop (Operator-Version: "second-operator-0.1.0" Active-Plan: "deploy")
-    └── Plan deploy (serial strategy) [COMPLETE]
-        └── Phase main [COMPLETE]
-            └── Step everything [COMPLETE]
 ```
 
 **KUDO Scale / Update Parameter**
-
 ```
 kubectl kudo update --instance secondop -p replicas=5
 
 k get po -w
 ```
 
+**KUDO Uninstall**
+Remove First Operator
+```
+kubectl kudo uninstall --instance secondop
+```
+
 ## Demo KUDO Plans and Plan Status with Zookeeper
 
 ```
-clear
 cd $ZK
+clear
 ```
 
 - Install Zookeeper with KUDO and check plan
@@ -299,6 +191,7 @@ Move to Kafka operator directory
 
 ```
 cd $KAFKA
+clear
 vi params.yaml
 cat params.yaml | grep ZOO
 ```
